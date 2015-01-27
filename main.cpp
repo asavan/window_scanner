@@ -36,6 +36,7 @@ int main(int argc, char* argv[])
 
 	int hwndInt = getProcessId();
 	int errCount = 0;
+	storage->setLayout("layout.txt");
 	for (int i = 0; i < 2000; ++i)
 	{
 		BmpAdaptor adaptor;

@@ -27,7 +27,8 @@ class Storage
 public:
     Storage(const std::string& layout_filename, const std::string& directory);
 
-    void learnCard(const Image& image, const struct Deck::Card card);
+	void setLayout(const std::string& layout_filename);
+    void learnCard(const Image& image, const Deck::Card& card);
     Deck::Card recognizeCard(const Image& image) const;
     unsigned int findButton(const Image& image, unsigned int seats_n) const;
 	// заменить на Image&

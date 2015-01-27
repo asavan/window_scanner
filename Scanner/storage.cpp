@@ -51,6 +51,17 @@ std::ostream& operator<<(std::ostream& stream, const Layout& l)
     return stream;
 }
 
+static char* getBMPChars(const boost::filesystem::path& base_dir, const std::string& filename)
+{
+	std::string full_name = base_dir.string() + '/' + filename;
+    std::fstream file(full_name.c_str(), std::ios::in|std::ios::binary);
+	boost::uintmax_t filesize = boost::filesystem::file_size(full_name);
+    char* bmp_image = new char [filesize];
+    file.read(bmp_image, filesize);
+    file.close();
+	return bmp_image;
+}
+
 Storage::Storage(const std::string& layout_filename, const std::string& base_dir1): layout_(layout_filename)
 {
 	boost::filesystem::path base_dir(base_dir1);
@@ -60,13 +71,7 @@ Storage::Storage(const std::string& layout_filename, const std::string& base_dir
         if (is_directory(*iter) || filename.size() < 10 || filename.size()%2 || filename.compare(filename.size() - 4, 4, ".bmp"))
             continue;
 
-		std::string full_name = base_dir.string() + '/' + filename;
-        std::fstream file(full_name.c_str(), std::ios::in|std::ios::binary);
-		boost::uintmax_t filesize = boost::filesystem::file_size(full_name);
-        char*const bmp_image = new char [filesize];
-        file.read(bmp_image, filesize);
-        file.close();
-
+		char* bmp_image = getBMPChars(base_dir, filename);
         
         std::string::const_iterator it = filename.begin();
         for (int i = 0; *it != '.' && *it != 'B'; ++i, ++it)
@@ -106,7 +111,7 @@ unsigned int Storage::findButton(const Image& image, unsigned int seats_n) const
     return seats_n+1;
 }
 
-void Storage::learnCard(const Image& image, const struct Deck::Card card)
+void Storage::learnCard(const Image& image, const Deck::Card& card)
 {
     if (card.rank == Deck::UNKNOWN_RANK || card.suit == Deck::UNKNOWN_SUIT)
         throw std::invalid_argument("can't learn unknown card");
@@ -116,6 +121,11 @@ void Storage::learnCard(const Image& image, const struct Deck::Card card)
     suits_[card.suit].merge(suit_pattern);
     ranks_[card.rank].dump__("tmp", std::string("_base_") + Deck::Rank2Name[card.rank]);
     suits_[card.suit].dump__("tmp", std::string("_base_") + Deck::Suit2Name[card.suit]);
+}
+
+void Storage::setLayout(const std::string& layout_filename)
+{
+	layout_ = Layout(layout_filename);
 }
 
 Deck::Card Storage::recognizeCard(const class Image& image) const
@@ -130,7 +140,7 @@ Deck::Card Storage::recognizeCard(const class Image& image) const
 
     for (CorellationType type = LinearCorellation; type <= LinearCorellation; ++type)
     {
-        int64_t max_correlation = std::numeric_limits<int64_t>::min();
+        int64_t max_correlation = -2000000; // trashhold param
         for (Deck::Rank rank = Deck::Two; rank <= Deck::Ace; ++rank)
         {
             int64_t current_corellation = Pattern<MonoColor>::corellation(ranks_[rank], rank_pattern, type); 
@@ -194,7 +204,10 @@ std::string Storage::getStringFromBmp(const BMP& bmp) const
 
 void Storage::test__(const std::string& layout_file, const boost::filesystem::path& directory)
 {
-    layout_ = Layout(layout_file);
+	if (!layout_file.empty())
+	{
+		setLayout(layout_file);
+	}
 
     for (boost::filesystem::directory_iterator iter(directory), end; iter != end; ++iter )
     {
@@ -204,20 +217,8 @@ void Storage::test__(const std::string& layout_file, const boost::filesystem::pa
         if (is_directory(*iter) || filename.size() < 5 || filename.compare(filename.size() - 4, 4, ".bmp"))
             continue;
 
-        std::fstream file((directory.string() + '/' + filename).c_str(), std::ios::in|std::ios::binary);
-        char* bmp_image = new char [boost::filesystem::file_size((directory.string() + '/' + filename))];
-        file.read(bmp_image, boost::filesystem::file_size((directory.string() + '/' + filename)));
-        file.close();
-
-        std::string new_filename;
-        for (unsigned int i = 0; i < filename.find('.')/2; ++i)
-        {
-            Deck::Card card = recognizeCard(Image(BMP(reinterpret_cast<const unsigned char*>(bmp_image)), layout_.widow.pos[i].x, layout_.widow.pos[i].y, layout_.widow.w, layout_.widow.h + layout_.widow.suit_y_shift));
-            new_filename += Deck::Rank2Abr[card.rank];
-            new_filename += Deck::Suit2Abr[card.suit];
-        }
-
-		// нужно ли
+        char* bmp_image = getBMPChars(directory, filename);
+        std::string new_filename = getStringFromBmp(BMP(reinterpret_cast<const unsigned char*>(bmp_image)));
 		delete bmp_image;
 
 //        int button_n = findButton(Image(reinterpret_cast<const unsigned char*>(bmp_image), 0, 0, layout_.width, layout_.height), 6);

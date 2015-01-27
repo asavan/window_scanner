@@ -68,10 +68,10 @@ public:
     MonoColor& operator/=(const int divisor) { intensity_ /= divisor; return *this; }
     MonoColor operator/(const int divisor) const { MonoColor result = *this; return result /= divisor; }
 
-    int64_t getIntensity(void) { return intensity_; }
-    int64_t getRed(void) { return intensity_;}
-    int64_t getGreen(void) { return intensity_;}
-    int64_t getBlue(void) { return intensity_;}
+    int64_t getIntensity(void) const { return intensity_; }
+    int64_t getRed(void) const { return intensity_;}
+    int64_t getGreen(void) const { return intensity_;}
+    int64_t getBlue(void) const { return intensity_;}
 
     MonoColor getInverted(void) const { return MonoColor(255 - intensity_); }
 
