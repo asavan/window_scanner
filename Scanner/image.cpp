@@ -35,6 +35,18 @@ BMP::BMP(const unsigned char*const bmp_file)
     // }
 //    std::cout << "bmp "<< width_ << " " << height_ << " " << bit_count_ << std::endl;
 }
+
+BMP::BMP(const unsigned char*const bmp_raw, unsigned int bit_count, unsigned int width, unsigned int height):
+bit_count_(bit_count), width_(width), height_(height), bitmap_(bmp_raw)
+{
+}
+
+RGBColor BMP::operator()(const unsigned y, const unsigned x) const
+{
+    const unsigned int pixel_adress = (((bit_count_/8)*width_ + 3)&0xfffffffc)*(height_ - y) + (bit_count_/8)*x;
+    return RGBColor(bitmap_[pixel_adress + 2], bitmap_[pixel_adress + 1], bitmap_[pixel_adress]);
+}
+
 Image::Image(const BMP& bmp, const unsigned int x, const unsigned int y, const unsigned int width, const unsigned int height):
     bmp_(bmp), height_(height), width_(width), x_(x), y_(y)
 {

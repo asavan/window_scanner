@@ -7,15 +7,11 @@ class BMP
 {
 public:
     BMP(const unsigned char*const bmp_file);
-
-    RGBColor operator()(const unsigned y, const unsigned x) const
-    {
-        const unsigned int pixel_adress = (((bit_count_/8)*width_ + 3)&0xfffffffc)*(height_ - y) + (bit_count_/8)*x;
-        return RGBColor(bitmap_[pixel_adress + 2], bitmap_[pixel_adress + 1], bitmap_[pixel_adress]);
-    }
+	BMP(const unsigned char*const bmp_raw, unsigned int bit_count, unsigned int width, unsigned int height);
+	RGBColor operator()(const unsigned y, const unsigned x) const;
 private:
-	BMP(const BMP&);
-	BMP& operator=(const BMP&);
+	// BMP(const BMP&);
+	// BMP& operator=(const BMP&);
     const unsigned char*bitmap_;
     unsigned int bit_count_;
     unsigned int width_;

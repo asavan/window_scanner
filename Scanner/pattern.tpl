@@ -51,18 +51,10 @@ template <typename TColor, int PatternWidth, int PatternHeight> Pattern<TColor, 
 //                std::cout << - 100/(signed int)(image.getWidth()) << " " << image.getWidth()<< std::endl;
             }
             else
+            {
                 r2 = TColor().getInverted();
-
-//                std::cout << r1 << " " << r2 << std::endl;
-//            /*
+            }
             new_inverted_pixel = ((r1*(cpy2 - cy) + r2*(cy - cpy1))/(cpy2 - cpy1)).getInverted();
-//            */
- //           new_inverted_pixel = ((q11 + q12 + q21 + q22)/4).getInverted();
-
-//            if (new_inverted_pixel.getIntensity() >= 256)
-//            {
-//                std::cout << "b3qkc " << h << " " << w << " " << new_inverted_pixel << std::endl;
-//            }
 
             inverted_colors_matrix[h][w] = new_inverted_pixel;
             summary_color_y += new_inverted_pixel*h;
@@ -197,13 +189,16 @@ void Pattern<TColor, PatternWidth, PatternHeight>::dump__(const std::string& pat
             *b++ = inverted_colors_matrix[h][w].getInverted().getRed();
         }
 
-//    std::cout << "path " << path << std::endl;
     std::ostringstream filename;
     filename << path << "/" << prefix << num << ".bmp";
-//    std::cout << filename.str().c_str() << std::endl;
+
     std::ofstream file(filename.str().c_str(), std::ios::binary);
-    file.write((const char*const)headers, 0x36);
-    file.write((const char*const)bitmap, 0x30036);
-    file.close();
+    if (file) {
+		file.write((const char*const)headers, 0x36);
+		file.write((const char*const)bitmap, 0x30036);
+		file.close();
+    } else {
+		std::cout << "No such file " << filename.str() << std::endl;
+    }
     num++;
 }

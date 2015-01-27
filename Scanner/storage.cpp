@@ -157,6 +157,41 @@ Deck::Card Storage::recognizeCard(const class Image& image) const
     return best_card;
 }
 
+std::vector<Deck::Card> Storage::recognizeTuple(const BMP& bmp) const
+{
+	std::vector<Deck::Card> results;
+	for (unsigned int i = 0; i < 5; ++i)
+    {
+        Deck::Card card = recognizeCard(Image(bmp, layout_.widow.pos[i].x, layout_.widow.pos[i].y, layout_.widow.w, layout_.widow.h + layout_.widow.suit_y_shift));
+		if (card.rank != Deck::Rank::UNKNOWN_RANK) 
+		{
+			results.push_back(card);
+		}
+		else
+		{
+			break;
+		}
+    }
+	return results;
+}
+
+std::string Storage::serializeTuple(const std::vector<Deck::Card>& vec) const
+{
+	std::string str;
+	for(std::vector<Deck::Card>::const_iterator it = vec.begin(); it != vec.end(); ++it) 
+	{
+		Deck::Card card = *it;
+        str += Deck::Rank2Abr[card.rank];
+        str += Deck::Suit2Abr[card.suit];
+	}
+	return str;
+}
+
+std::string Storage::getStringFromBmp(const BMP& bmp) const
+{
+	return serializeTuple(recognizeTuple(bmp));
+}
+
 void Storage::test__(const std::string& layout_file, const boost::filesystem::path& directory)
 {
     layout_ = Layout(layout_file);
@@ -170,14 +205,14 @@ void Storage::test__(const std::string& layout_file, const boost::filesystem::pa
             continue;
 
         std::fstream file((directory.string() + '/' + filename).c_str(), std::ios::in|std::ios::binary);
-        char*const bmp_image = new char [boost::filesystem::file_size((directory.string() + '/' + filename))];
+        char* bmp_image = new char [boost::filesystem::file_size((directory.string() + '/' + filename))];
         file.read(bmp_image, boost::filesystem::file_size((directory.string() + '/' + filename)));
         file.close();
 
         std::string new_filename;
         for (unsigned int i = 0; i < filename.find('.')/2; ++i)
         {
-            Deck::Card card = recognizeCard(Image(reinterpret_cast<const unsigned char*>(bmp_image), layout_.widow.pos[i].x, layout_.widow.pos[i].y, layout_.widow.w, layout_.widow.h + layout_.widow.suit_y_shift));
+            Deck::Card card = recognizeCard(Image(BMP(reinterpret_cast<const unsigned char*>(bmp_image)), layout_.widow.pos[i].x, layout_.widow.pos[i].y, layout_.widow.w, layout_.widow.h + layout_.widow.suit_y_shift));
             new_filename += Deck::Rank2Abr[card.rank];
             new_filename += Deck::Suit2Abr[card.suit];
         }

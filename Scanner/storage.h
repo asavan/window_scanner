@@ -30,7 +30,10 @@ public:
     void learnCard(const Image& image, const struct Deck::Card card);
     Deck::Card recognizeCard(const Image& image) const;
     unsigned int findButton(const Image& image, unsigned int seats_n) const;
-
+	// заменить на Image&
+	std::vector<Deck::Card> recognizeTuple(const BMP& bmp) const;
+	std::string serializeTuple(const std::vector<Deck::Card>& vec) const;
+	std::string getStringFromBmp(const BMP& bmp) const;
     void test__(const std::string& layout_filename, const boost::filesystem::path& directory);
 
 private:

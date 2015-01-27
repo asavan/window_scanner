@@ -13,6 +13,6 @@ int main(int argc, char* argv[])
 
 //    storage->test__("tempbase/1680x1050/layout", "tempbase/1680x1050");
     storage->test__("1680x1050/layout", "1680x1050");
-
+	delete storage;
     return 0;
 }
