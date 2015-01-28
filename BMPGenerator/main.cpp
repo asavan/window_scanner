@@ -48,6 +48,7 @@ int make_many_pictures()
 
 int main()
 {
-	make_many_pictures();
+	// make_many_pictures();
+	f();
 	return 0;
 }

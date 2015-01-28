@@ -45,6 +45,7 @@ case 4:
 case 8: 
 case 32:
 ColorSize = sizeof(RGBQUAD) * (1 << BitCount); 
+break;
 case 16:
 case 24:
 ColorSize = 0; 
@@ -86,7 +87,7 @@ return(true);
 }
 
 
-bool StoreBitmapFile(BmpAdaptor& adaptor, HBITMAP HBM)
+bool StoreBitmapToAdaptor(BmpAdaptor& adaptor, HBITMAP HBM)
 {
 BITMAP BM; 
 LPBITMAPINFO BIP; 
@@ -174,7 +175,16 @@ void SaveWindow2BMP(HWND find, const std::string& filename)
 {
 	if (find == 0) return;
     HBITMAP bmp = CreateClientWindwowBitmap(find);
-	StoreBitmapFile(filename.c_str(), bmp);
+	if (bmp == 0) 
+	{
+		std::cout << "No window " << find << std::endl;
+	} 
+	else 
+	{
+		StoreBitmapFile(filename.c_str(), bmp);
+		DeleteObject(bmp);
+	}
+	
 }
 
 
@@ -188,6 +198,7 @@ void SaveWindow2BMPRaw(HWND find, BmpAdaptor& adaptor)
 	} 
 	else 
 	{
-		StoreBitmapFile(adaptor, bmp);
+		StoreBitmapToAdaptor(adaptor, bmp);
+		DeleteObject(bmp);
 	}
 }

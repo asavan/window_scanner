@@ -36,11 +36,19 @@ int main(int argc, char* argv[])
 
 	int hwndInt = getProcessId();
 	int errCount = 0;
+	std::cout << "Study complete " << std::endl;
 	storage->setLayout("layout.txt");
 	for (int i = 0; i < 2000; ++i)
 	{
 		BmpAdaptor adaptor;
 		SaveWindow2BMPRaw(HWND(hwndInt), adaptor);
+
+		std::stringstream str;
+		str << "tmp1/ii";
+		str << i;
+		str << ".bmp";
+
+		SaveWindow2BMP(HWND(hwndInt), str.str());
 		if(adaptor.isValid())
 		{
 			std::string str = storage->getStringFromBmp(adaptor.getBmp());
@@ -53,7 +61,7 @@ int main(int argc, char* argv[])
 			{
 				break;
 			}
-		// Sleep(100);
+		Sleep(100);
 		}
 	}
 
