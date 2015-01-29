@@ -119,8 +119,8 @@ void Storage::learnCard(const Image& image, const Deck::Card& card)
     ranks_[card.rank].merge(rank_pattern);
     Pattern<RGBColor> suit_pattern(image.clip(0, layout_.widow.suit_y_shift, layout_.widow.w, layout_.widow.h));
     suits_[card.suit].merge(suit_pattern);
-    ranks_[card.rank].dump__("tmp", std::string("_base_") + Deck::Rank2Name[card.rank]);
-    suits_[card.suit].dump__("tmp", std::string("_base_") + Deck::Suit2Name[card.suit]);
+    // ranks_[card.rank].dump__("tmp", std::string("_base_") + Deck::Rank2Name[card.rank]);
+    // suits_[card.suit].dump__("tmp", std::string("_base_") + Deck::Suit2Name[card.suit]);
 }
 
 void Storage::setLayout(const std::string& layout_filename)
