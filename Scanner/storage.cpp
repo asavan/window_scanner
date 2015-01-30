@@ -99,11 +99,11 @@ Storage::Storage(const std::string& layout_filename, const std::string& base_dir
 			{
                 if (i == *++it - '0')
 				{
-                    button_.merge(Image(bmp, layout_.button6.pos[i].x, layout_.button6.pos[i].y, layout_.button6.w, layout_.button6.h));
+                    button_.merge(Pattern<RGBColor>(Image(bmp, layout_.button6.pos[i].x, layout_.button6.pos[i].y, layout_.button6.w, layout_.button6.h)));
 				}
                 else
 				{
-					no_button_.merge(Image(bmp, layout_.button6.pos[i].x, layout_.button6.pos[i].y, layout_.button6.w, layout_.button6.h));
+					no_button_.merge(Pattern<RGBColor>(Image(bmp, layout_.button6.pos[i].x, layout_.button6.pos[i].y, layout_.button6.w, layout_.button6.h)));
 				}
 			}
 		}
@@ -123,8 +123,8 @@ unsigned int Storage::findButton(const Image& image, unsigned int seats_n) const
     for (unsigned int i = 0; i < seats_n; ++i)
     {
 		Pattern<RGBColor> pattern(image.clip(layout_.button6.pos[i].x, layout_.button6.pos[i].y, layout_.button6.w, layout_.button6.h));
-        int64_t button_corr = Pattern<RGBColor>::corellation(button_, pattern, LinearCorellation); 
-        int64_t no_button_corr = Pattern<RGBColor>::corellation(no_button_, pattern, LinearCorellation); 
+        int button_corr = Pattern<RGBColor>::corellation(button_, pattern, LinearCorellation); 
+        int no_button_corr = Pattern<RGBColor>::corellation(no_button_, pattern, LinearCorellation); 
         if (button_corr > no_button_corr)
             return i;
     }
@@ -175,20 +175,20 @@ Deck::Card Storage::recognizeCard(const class Image& image) const
 
     for (CorellationType type = LinearCorellation; type <= LinearCorellation; ++type)
     {
-        int64_t max_correlation = -2000000; // trashhold param
+        int max_correlation = -2000000; // trashhold param
         for (Deck::Rank rank = Deck::Two; rank <= Deck::Ace; ++rank)
         {
-            int64_t current_corellation = Pattern<MonoColor>::corellation(ranks_[rank], rank_pattern, type); 
+            int current_corellation = Pattern<MonoColor>::corellation(ranks_[rank], rank_pattern, type); 
             if (current_corellation > max_correlation)
             {
                 max_correlation = current_corellation;
                 best_rank = rank;
             }
         }
-        max_correlation = std::numeric_limits<int64_t>::min();
+        max_correlation = -2000000; // trashhold param
         for (Deck::Suit suit = Deck::Hearts; suit <= Deck::Spades; ++suit)
         {
-            int64_t current_corellation = Pattern<RGBColor>::corellation(suits_[suit], suit_pattern, type); 
+            int current_corellation = Pattern<RGBColor>::corellation(suits_[suit], suit_pattern, type); 
             if (current_corellation > max_correlation)
             {
                 max_correlation = current_corellation;
@@ -208,7 +208,7 @@ std::vector<Deck::Card> Storage::recognizeTupleFromImage(const Image& img) const
 	for (unsigned int i = 0; i < 5; ++i)
     {
         Deck::Card card = recognizeCard(Image(img, layout_.widow.pos[i].x, layout_.widow.pos[i].y, layout_.widow.w, layout_.widow.h + layout_.widow.suit_y_shift));
-		if (card.rank != Deck::Rank::UNKNOWN_RANK) 
+		if (card.rank != Deck::UNKNOWN_RANK) 
 		{
 			results.push_back(card);
 		}

@@ -106,7 +106,7 @@ void Pattern<TColor, PatternWidth, PatternHeight>::merge(const Pattern<TColor>& 
 }
 
 template<typename TColor, int PatternWidth, int PatternHeight>
-int64_t Pattern<TColor, PatternWidth, PatternHeight>::
+int Pattern<TColor, PatternWidth, PatternHeight>::
 corellation(const Pattern<TColor, PatternWidth, PatternHeight>& a, const Pattern<TColor, PatternWidth, PatternHeight>& b, const CorellationType type)
 {
 //        std::cout << " " << a.intensity_center_y_ << " " << b.intensity_center_y_ << " " << a.intensity_center_x_ << " " <<  b.intensity_center_x_ << std::endl;
@@ -121,7 +121,7 @@ corellation(const Pattern<TColor, PatternWidth, PatternHeight>& a, const Pattern
         const int average_b = (is_need_opt_(type, Balancing))? b.average_intensity_: 0;
 
 //        std::cout << " " << int_cent_dx << " " << int_cent_dy << " " << ratio << " " << average_a << " " << average_b << std::endl;
-        int64_t corellation = 0;
+        int corellation = 0;
         for (int h = abs(int_cent_dy); h < PatternHeight; ++h)
         {
             for (int w = abs(int_cent_dx); w < PatternWidth; ++w)

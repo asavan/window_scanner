@@ -11,11 +11,11 @@ class Pattern
 public:
 
     Pattern(void): grade_(0), summary_intensity_(0), average_intensity_(0) {}
-    Pattern(const Image& image);
+    explicit Pattern(const Image& image);
 
     void merge(const Pattern<TColor>&);
 
-    static int64_t corellation(const Pattern&, const Pattern&, CorellationType);
+    static int corellation(const Pattern&, const Pattern&, CorellationType);
 
     void dump__(const std::string& filename, const std::string& prefix) const;
 
@@ -31,8 +31,8 @@ private:
     static const unsigned int Max_Grade_ = 2*MaxColor;
     unsigned int grade_;
 
-    uint64_t summary_intensity_;
-    uint64_t average_intensity_;
+    int summary_intensity_;
+    int average_intensity_;
     int intensity_center_y_;
     int intensity_center_x_;
 
@@ -42,8 +42,8 @@ template <typename TColor, int PatternWidth, int PatternHeight>
 const bool Pattern<TColor, PatternWidth, PatternHeight>::cor_opt_[CorFuncN][CorOptN] =
 {// Centering Normalization Balancing
      {true,       true,       false}, // LinearCorellation
-     {true,       true,       false}, // QuadraticCorellation
-     {true,       false,      true}   // MultiplyingCorellation
+     {true,       true,       false}//, // QuadraticCorellation
+//     {true,       false,      true}   // MultiplyingCorellation
 };
 
 #include "pattern.tpl"
