@@ -31,16 +31,18 @@ static boost::shared_ptr<Storage> makeStorage(int argc, char* argv[])
 	return storage;
 }
 
-bool recognizeOneImage(const Storage& storage, int& errCount)
+bool recognizeOneImage(const Storage& storage, int& errCount, int hwndInt, int count)
 {
-	int hwndInt = getProcessId();
+	// int hwndInt = getProcessId();
 	BmpAdaptor adaptor;
 	if(adaptor.captureWindow(hwndInt))
 	{
-		errCount = 0;
-		Sleeper s(0); // only show time
+		errCount = 0;		
 		std::string str = storage.getStringFromImage(adaptor.getImage());
-		std::cout << str << std::endl;
+		if ((count%100) == 0)
+		{
+			std::cout << str << std::endl;
+		}
 		return true;
 	}
 	return false;
@@ -52,9 +54,12 @@ int main(int argc, char* argv[])
 	boost::shared_ptr<Storage> storage = makeStorage(argc, argv);
 	storage->setLayout("layout.txt");
 	int errCount = 0;
-	for (int i = 0; i < 2000; ++i)
+	int hwndInt = getProcessId();
+	{
+	Sleeper s(0); // only show time
+	for (int i = 0; i < 1000; ++i)
 	{				
-		if(!recognizeOneImage(*storage, errCount))
+		if(!recognizeOneImage(*storage, errCount, hwndInt, i))
 		{			
 			++errCount;
 			if(errCount > 4) 
@@ -63,6 +68,7 @@ int main(int argc, char* argv[])
 			}
 			Sleeper s(2);
 		}
+	}
 	}
     return 0;
 }

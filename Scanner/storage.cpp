@@ -167,7 +167,7 @@ Deck::Card Storage::recognizeCard(const class Image& image) const
 {
     const Pattern<MonoColor> rank_pattern(image.clip(0, 0, layout_.widow.w, layout_.widow.h));
     const Pattern<RGBColor> suit_pattern(image.clip(0, layout_.widow.suit_y_shift, layout_.widow.w, layout_.widow.h));
-    rank_pattern.dump__("tmp", "RANK");
+    // rank_pattern.dump__("tmp", "RANK");
     // suit_pattern.dump__("tmp", "SUIT");
     Deck::Rank best_rank = Deck::UNKNOWN_RANK;
     Deck::Suit best_suit = Deck::UNKNOWN_SUIT;
@@ -175,7 +175,7 @@ Deck::Card Storage::recognizeCard(const class Image& image) const
 
     for (CorellationType type = LinearCorellation; type <= LinearCorellation; ++type)
     {
-        int max_correlation = -2000000; // trashhold param
+        int max_correlation = -20000; // trashhold param
         for (Deck::Rank rank = Deck::Two; rank <= Deck::Ace; ++rank)
         {
             int current_corellation = Pattern<MonoColor>::corellation(ranks_[rank], rank_pattern, type); 
@@ -185,7 +185,7 @@ Deck::Card Storage::recognizeCard(const class Image& image) const
                 best_rank = rank;
             }
         }
-        max_correlation = -2000000; // trashhold param
+        max_correlation = -20000; // trashhold param
         for (Deck::Suit suit = Deck::Hearts; suit <= Deck::Spades; ++suit)
         {
             int current_corellation = Pattern<RGBColor>::corellation(suits_[suit], suit_pattern, type); 

@@ -5,7 +5,7 @@
 #include "color.h"
 class Image;
 
-template<typename TColor, int PatternWidth = 256, int PatternHeight = 256>
+template<typename TColor, int PatternWidth = 32, int PatternHeight = 32>
 class Pattern
 {
 public:
