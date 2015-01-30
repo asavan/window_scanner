@@ -263,8 +263,12 @@ void SaveWindow2BMP(HWND find, const std::string& filename)
 	} 
 	else 
 	{
-		StoreBitmapFile(filename.c_str(), bmp);
+		bool res = StoreBitmapFile(filename.c_str(), bmp);
 		DeleteObject(bmp);
+		if (!res)
+		{
+			std::cout << "window minimized " << winname << std::endl;
+		}
 	}
 	
 }
@@ -280,17 +284,19 @@ bool BmpAdaptor::captureWindow(int hwndId)
 
 void scan_all_windows()
 {
+	Sleeper s(0);
 	int i = 0;	
-	for ( HWND find2 = FindWindow(NULL, NULL); find2; ++i)
+	for ( HWND find = FindWindow(NULL, NULL); find; ++i)
 	{
-		SaveWindow2BMP(find2, getFilename("tmp3/", i));
-		find2 = FindWindowEx(NULL, find2, NULL, NULL);		
+		std::string winname = "tmp3/" + getWinName(find);
+		SaveWindow2BMP(find, getFilename(winname, i));
+		find = FindWindowEx(NULL, find, NULL, NULL);		
 	}
 }
 
 int make_many_pictures()
 {
-	for (int i = 0; i < 2000; ++i)
+	for (int i = 0; i < 1000; ++i)
 	{
 		Sleeper sl(1);		
 		int hwndInt = getProcessId();

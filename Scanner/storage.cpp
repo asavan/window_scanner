@@ -185,7 +185,7 @@ Deck::Card Storage::recognizeCard(const class Image& image) const
                 best_rank = rank;
             }
         }
-        max_correlation = -20000; // trashhold param
+        max_correlation = -100000; // trashhold param
         for (Deck::Suit suit = Deck::Hearts; suit <= Deck::Spades; ++suit)
         {
             int current_corellation = Pattern<RGBColor>::corellation(suits_[suit], suit_pattern, type); 
@@ -211,9 +211,17 @@ std::vector<Deck::Card> Storage::recognizeTupleFromImage(const Image& img) const
 		if (card.rank != Deck::UNKNOWN_RANK) 
 		{
 			results.push_back(card);
+			if(card.suit == Deck::UNKNOWN_SUIT)
+			{
+				std::cout << "WARNING suit not recognized" << std::endl;
+			}
 		}
 		else
 		{
+			if(card.suit != Deck::UNKNOWN_SUIT)
+			{
+				std::cout << "WARNING suit recognized" << std::endl;
+			}
 			break;
 		}
     }
