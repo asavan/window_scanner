@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 			{
 				break;
 			}
-			Sleeper s(2);
+			Sleeper s(5);
 		}
 	}
 	}
