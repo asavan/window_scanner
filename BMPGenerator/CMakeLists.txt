@@ -4,7 +4,7 @@ project(BMPGenerator)
 
 SET( BMP_SOURSES 
 window2bmp.cpp
-FindWinwow.cpp
+FindWindow.cpp
 )
 
 SET( BMP_HEADERS window2bmp.h BmpAdaptor.h)

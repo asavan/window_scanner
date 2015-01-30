@@ -1,9 +1,12 @@
 #include "window2bmp.h"
 
+// #include <windows.h>
+
 #include <sstream>
 #include <fstream>
 #include <iostream>
 #include <ctime>
+#include <boost/thread/thread.hpp>
 
 std::string getFilename(const std::string& basename, int i)
 {
@@ -46,59 +49,27 @@ int getProcessId()
 	return hwndInt;
 }
 
-void scan_all_windows()
+
+Sleeper::Sleeper(int sec) : sec_(sec)
 {
-	int i = 0;	
-	for ( HWND find2 = FindWindow(NULL, NULL); find2; ++i)
-	{
-		SaveWindow2BMP(find2, getFilename("tmp3/", i));
-		find2 = FindWindowEx(NULL, find2, NULL, NULL);		
-	}
+	start = boost::chrono::high_resolution_clock::now();
 }
 
-
-
-class Sleeper
+Sleeper::~Sleeper()
 {
-public:
-	Sleeper(int sec) : sec_(sec)
-	{
-		t_ = time(0);
+	boost::chrono::high_resolution_clock::time_point end = boost::chrono::high_resolution_clock::now();
+	typedef boost::chrono::milliseconds ms;
+	ms d = boost::chrono::duration_cast<ms>(end - start);
+	ms ms_wait = ms(sec_*1000) - d;
+	std::cout <<"Time "<< d << std::endl;
+	std::cout <<"TimeToWait "<< ms_wait << std::endl;
+	
+	if (ms_wait > ms::zero())
+	{		
+		boost::this_thread::sleep_for( ms_wait );
 	}
-	~Sleeper()
+	else 
 	{
-		time_t finish = time(0);
-		time_t diff = finish - t_;
-		if (sec_ > diff)
-		{
-			Sleep(1000*(sec_-diff));
-		}
-		else 
-		{
-			std::cout << "Diff is so big " << diff << " " << sec_<< std::endl;
-		}
+		std::cout << "Diff is so big " << d << " " << sec_<< std::endl;
 	}
-private:
-	int sec_;
-	time_t t_;
-};
-
-
-
-int make_many_pictures()
-{
-	for (int i = 0; i < 2000; ++i)
-	{
-		Sleeper sl(1);		
-		int hwndInt = getProcessId();
-		std::string baseName = loadBaseName();
-		SaveWindow2BMP(HWND(hwndInt), getFilename(baseName, i));
-	}
-	return 0;
 }
-
-
-
-
-
-

@@ -4,6 +4,10 @@
 
 #include "../Scanner/image.h"
 
+#include <windows.h>
+
+
+
 BmpAdaptor::BmpAdaptor() : isValid_(false), bit_count_(0), width_(0), height_(0), Buf_(0), bmp(0)
 {
 };
@@ -20,6 +24,12 @@ BmpAdaptor::~BmpAdaptor()
 	{
 		printf("Not delete this %p\n", Buf_);
 	}
+}
+
+
+Image BmpAdaptor::getImage() const
+{
+	return Image::getImageFromBmp(getBmp());
 }
 
 void BmpAdaptor::setBitCountWidthHeightBuf(unsigned int bit_count, unsigned int width, unsigned int height, unsigned char* Buf)
@@ -139,7 +149,7 @@ BOOL StoreBitmapFile(LPCTSTR lpszFileName, HBITMAP HBM)
 }
 
 
-bool StoreBitmapToAdaptor(BmpAdaptor& adaptor, HBITMAP HBM)
+static bool StoreBitmapToAdaptor(BmpAdaptor& adaptor, HBITMAP HBM)
 {
 	BITMAP BM = {0}; 
 	GetObject(HBM, sizeof(BITMAP), (LPSTR)&BM);
@@ -212,6 +222,22 @@ HBITMAP CreateClientWindwowBitmap(HWND wnd)
 	return hbm;
 }
 
+static void SaveWindow2BMPRaw(int find, BmpAdaptor& adaptor)
+{
+	if (find == 0) return;
+    HBITMAP bmp = CreateClientWindwowBitmap((HWND)find);
+	if (bmp == 0) 
+	{
+		std::cout << "No window " << find << std::endl;
+	} 
+	else 
+	{
+		StoreBitmapToAdaptor(adaptor, bmp);
+		DeleteObject(bmp);
+	}
+}
+
+
 std::string getWinName(HWND find)
 {
 	char wname[256];
@@ -244,17 +270,32 @@ void SaveWindow2BMP(HWND find, const std::string& filename)
 }
 
 
-void SaveWindow2BMPRaw(HWND find, BmpAdaptor& adaptor)
+
+bool BmpAdaptor::captureWindow(int hwndId)
 {
-	if (find == 0) return;
-    HBITMAP bmp = CreateClientWindwowBitmap(find);
-	if (bmp == 0) 
+	SaveWindow2BMPRaw(hwndId, *this);
+	return isValid();
+}
+
+
+void scan_all_windows()
+{
+	int i = 0;	
+	for ( HWND find2 = FindWindow(NULL, NULL); find2; ++i)
 	{
-		std::cout << "No window " << find << std::endl;
-	} 
-	else 
-	{
-		StoreBitmapToAdaptor(adaptor, bmp);
-		DeleteObject(bmp);
+		SaveWindow2BMP(find2, getFilename("tmp3/", i));
+		find2 = FindWindowEx(NULL, find2, NULL, NULL);		
 	}
+}
+
+int make_many_pictures()
+{
+	for (int i = 0; i < 2000; ++i)
+	{
+		Sleeper sl(1);		
+		int hwndInt = getProcessId();
+		std::string baseName = loadBaseName();
+		SaveWindow2BMP(HWND(hwndInt), getFilename(baseName, i));
+	}
+	return 0;
 }
