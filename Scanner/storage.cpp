@@ -1,5 +1,7 @@
 #include "storage.h"
 
+#include "image.h"
+
 #include <iostream>
 #include <string>
 
@@ -230,7 +232,7 @@ std::string Storage::serializeTuple(const std::vector<Deck::Card>& vec) const
 	return str;
 }
 
-std::string Storage::getStringFromBmp(const Image& img) const
+std::string Storage::getStringFromImage(const Image& img) const
 {
 	return serializeTuple(recognizeTupleFromImage(img));
 }
@@ -254,7 +256,7 @@ void Storage::test__(const std::string& layout_file, const std::string& director
 
         char* bmp_image = getBMPChars(directory, filename);
 		BMP bmp(reinterpret_cast<const unsigned char*>(bmp_image));
-		std::string new_filename = getStringFromBmp(Image::getImageFromBmp(bmp));
+		std::string new_filename = getStringFromImage(Image::getImageFromBmp(bmp));
 		delete bmp_image;
 
 //        int button_n = findButton(Image(reinterpret_cast<const unsigned char*>(bmp_image), 0, 0, layout_.width, layout_.height), 6);

@@ -33,11 +33,9 @@ public:
     void learnCard(const Image& image, const Deck::Card& card);
     Deck::Card recognizeCard(const Image& image) const;
     unsigned int findButton(const Image& image, unsigned int seats_n) const;
-	// заменить на Image&
-	// std::vector<Deck::Card> recognizeTuple(const BMP& bmp) const;
-	std::vector<Deck::Card> recognizeTupleFromImage(const Image& bmp) const;
+	std::vector<Deck::Card> recognizeTupleFromImage(const Image& img) const;
 	std::string serializeTuple(const std::vector<Deck::Card>& vec) const;
-	std::string getStringFromBmp(const Image& bmp) const;
+	std::string getStringFromImage(const Image& img) const;
 	bool hasUnlearnedCards() const;
     void test__(const std::string& layout_filename, const std::string& directory);
 

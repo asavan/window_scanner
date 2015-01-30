@@ -1,7 +1,9 @@
 #ifndef PATTERN_H
 #define PATTERN_H
 
-#include "image.h"
+// #include "image.h"
+#include "color.h"
+class Image;
 
 template<typename TColor, int PatternWidth = 256, int PatternHeight = 256>
 class Pattern

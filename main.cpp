@@ -1,7 +1,10 @@
 #include "deck.h"
 #include "Scanner/storage.h"
+
 #include "BMPGenerator/window2bmp.h"
 #include <iostream>
+
+#include "Scanner/image.h"
 
 	
 
@@ -35,7 +38,7 @@ int main(int argc, char* argv[])
 		if(adaptor.isValid())
 		{
 			errCount = 0;
-			std::string str = storage->getStringFromBmp(Image::getImageFromBmp(adaptor.getBmp()));
+			std::string str = storage->getStringFromImage(Image::getImageFromBmp(adaptor.getBmp()));
 			std::cout << str << std::endl;
 		}
 		else 
