@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <string>
+
+#include <boost/filesystem.hpp>
 // #include <limits>
 
 namespace Deck
@@ -62,8 +64,17 @@ static char* getBMPChars(const boost::filesystem::path& base_dir, const std::str
 	return bmp_image;
 }
 
-Storage::Storage(const std::string& layout_filename, const std::string& base_dir1): layout_(layout_filename)
+Storage::Storage(const std::string& layout_filename, const std::string& base_dir1, bool learnFast): layout_(layout_filename)
 {
+	for (int i = 0; i < Deck::RankN; ++i)
+	{
+		known_ranks[i] = false;
+	}
+
+	for (int i = 0; i < Deck::SuitN; ++i)
+	{
+		known_suits[i] = false;
+	}
 	boost::filesystem::path base_dir(base_dir1);
     for (boost::filesystem::directory_iterator iter(base_dir), end; iter != end; ++iter )
     {
@@ -72,13 +83,13 @@ Storage::Storage(const std::string& layout_filename, const std::string& base_dir
             continue;
 
 		char* bmp_image = getBMPChars(base_dir, filename);
-        
+        BMP bmp(reinterpret_cast<const unsigned char*>(bmp_image));
         std::string::const_iterator it = filename.begin();
         for (int i = 0; *it != '.' && *it != 'B'; ++i, ++it)
         {
             Deck::Rank rank = Deck::Abr2Rank[*it];
             Deck::Suit suit = Deck::Abr2Suit[*(++it)];
-            learnCard(Image(BMP(reinterpret_cast<const unsigned char*>(bmp_image)), layout_.widow.pos[i].x, layout_.widow.pos[i].y, layout_.widow.w, layout_.widow.h + layout_.widow.suit_y_shift), Deck::Card(rank, suit));
+            learnCard(Image(bmp, layout_.widow.pos[i].x, layout_.widow.pos[i].y, layout_.widow.w, layout_.widow.h + layout_.widow.suit_y_shift), Deck::Card(rank, suit));
         }
         if (*it == 'B')
 		{
@@ -86,15 +97,22 @@ Storage::Storage(const std::string& layout_filename, const std::string& base_dir
 			{
                 if (i == *++it - '0')
 				{
-                    button_.merge(Image(BMP(reinterpret_cast<const unsigned char*>(bmp_image)), layout_.button6.pos[i].x, layout_.button6.pos[i].y, layout_.button6.w, layout_.button6.h));
+                    button_.merge(Image(bmp, layout_.button6.pos[i].x, layout_.button6.pos[i].y, layout_.button6.w, layout_.button6.h));
 				}
                 else
 				{
-					no_button_.merge(Image(BMP(reinterpret_cast<const unsigned char*>(bmp_image)), layout_.button6.pos[i].x, layout_.button6.pos[i].y, layout_.button6.w, layout_.button6.h));
+					no_button_.merge(Image(bmp, layout_.button6.pos[i].x, layout_.button6.pos[i].y, layout_.button6.w, layout_.button6.h));
 				}
 			}
 		}
 		delete [] bmp_image;
+		if (learnFast)
+		{
+			if(!hasUnlearnedCards())
+			{
+				break;
+			}
+		}
     }
 }
 
@@ -111,14 +129,29 @@ unsigned int Storage::findButton(const Image& image, unsigned int seats_n) const
     return seats_n+1;
 }
 
+bool Storage::hasUnlearnedCards() const
+{
+	for (int i = 0; i < Deck::RankN; ++i)
+	{
+		if(!known_ranks[i]) return true;
+	}
+	for (int i = 0; i < Deck::SuitN; ++i)
+	{
+		if(!known_suits[i]) return true;
+	}
+	return false;
+}
+
 void Storage::learnCard(const Image& image, const Deck::Card& card)
 {
     if (card.rank == Deck::UNKNOWN_RANK || card.suit == Deck::UNKNOWN_SUIT)
         throw std::invalid_argument("can't learn unknown card");
     Pattern<MonoColor> rank_pattern(image.clip(0, 0, layout_.widow.w, layout_.widow.h));
     ranks_[card.rank].merge(rank_pattern);
+	known_ranks[card.rank] = true;
     Pattern<RGBColor> suit_pattern(image.clip(0, layout_.widow.suit_y_shift, layout_.widow.w, layout_.widow.h));
     suits_[card.suit].merge(suit_pattern);
+	known_suits[card.suit] = true;
     // ranks_[card.rank].dump__("tmp", std::string("_base_") + Deck::Rank2Name[card.rank]);
     // suits_[card.suit].dump__("tmp", std::string("_base_") + Deck::Suit2Name[card.suit]);
 }
@@ -133,7 +166,7 @@ Deck::Card Storage::recognizeCard(const class Image& image) const
     const Pattern<MonoColor> rank_pattern(image.clip(0, 0, layout_.widow.w, layout_.widow.h));
     const Pattern<RGBColor> suit_pattern(image.clip(0, layout_.widow.suit_y_shift, layout_.widow.w, layout_.widow.h));
     rank_pattern.dump__("tmp", "RANK");
-    suit_pattern.dump__("tmp", "SUIT");
+    // suit_pattern.dump__("tmp", "SUIT");
     Deck::Rank best_rank = Deck::UNKNOWN_RANK;
     Deck::Suit best_suit = Deck::UNKNOWN_SUIT;
     Deck::Card best_card;
@@ -167,12 +200,12 @@ Deck::Card Storage::recognizeCard(const class Image& image) const
     return best_card;
 }
 
-std::vector<Deck::Card> Storage::recognizeTuple(const BMP& bmp) const
+std::vector<Deck::Card> Storage::recognizeTupleFromImage(const Image& img) const
 {
 	std::vector<Deck::Card> results;
 	for (unsigned int i = 0; i < 5; ++i)
     {
-        Deck::Card card = recognizeCard(Image(bmp, layout_.widow.pos[i].x, layout_.widow.pos[i].y, layout_.widow.w, layout_.widow.h + layout_.widow.suit_y_shift));
+        Deck::Card card = recognizeCard(Image(img, layout_.widow.pos[i].x, layout_.widow.pos[i].y, layout_.widow.w, layout_.widow.h + layout_.widow.suit_y_shift));
 		if (card.rank != Deck::Rank::UNKNOWN_RANK) 
 		{
 			results.push_back(card);
@@ -197,17 +230,19 @@ std::string Storage::serializeTuple(const std::vector<Deck::Card>& vec) const
 	return str;
 }
 
-std::string Storage::getStringFromBmp(const BMP& bmp) const
+std::string Storage::getStringFromBmp(const Image& img) const
 {
-	return serializeTuple(recognizeTuple(bmp));
+	return serializeTuple(recognizeTupleFromImage(img));
 }
 
-void Storage::test__(const std::string& layout_file, const boost::filesystem::path& directory)
+void Storage::test__(const std::string& layout_file, const std::string& directory1)
 {
 	if (!layout_file.empty())
 	{
 		setLayout(layout_file);
 	}
+
+	boost::filesystem::path directory(directory1);
 
     for (boost::filesystem::directory_iterator iter(directory), end; iter != end; ++iter )
     {
@@ -218,7 +253,8 @@ void Storage::test__(const std::string& layout_file, const boost::filesystem::pa
             continue;
 
         char* bmp_image = getBMPChars(directory, filename);
-        std::string new_filename = getStringFromBmp(BMP(reinterpret_cast<const unsigned char*>(bmp_image)));
+		BMP bmp(reinterpret_cast<const unsigned char*>(bmp_image));
+		std::string new_filename = getStringFromBmp(Image::getImageFromBmp(bmp));
 		delete bmp_image;
 
 //        int button_n = findButton(Image(reinterpret_cast<const unsigned char*>(bmp_image), 0, 0, layout_.width, layout_.height), 6);

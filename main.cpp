@@ -3,22 +3,6 @@
 #include "BMPGenerator/window2bmp.h"
 #include <iostream>
 
-static int getProcessId()
-{
-	FILE* f;
-	f = fopen("config.txt", "r");
-	if (!f) throw std::runtime_error("No config file");
-	char name[256];
-	fscanf(f, "%s", name);
-	std::string filename = name;
-	// ifs >> filename;
-	int hwndInt;
-	// ifs >> hwndInt;
-	fscanf(f, "%x", &hwndInt);
-	printf("%x\n", hwndInt);
-	fclose(f);
-	return hwndInt;
-}
 	
 
 int main(int argc, char* argv[])
@@ -26,42 +10,42 @@ int main(int argc, char* argv[])
     Storage* storage = NULL;
     if (argc < 3)
     {
-        std::cout << "Default arguments are used" << std::endl;
-        storage = new Storage("../base/1680x1050/layout", "../base/1680x1050");
+        std::cout << "Default arguments" << std::endl;
+        storage = new Storage("../base/1680x1050/layout", "../base/1680x1050", true);
     }
     else
 	{
         storage = new Storage(argv[1], argv[2]);
 	}
-
-	int hwndInt = getProcessId();
-	int errCount = 0;
+	
+	if (storage->hasUnlearnedCards())
+	{
+		std::cout << "Study not complete " << std::endl;
+		return 1;
+	}
 	std::cout << "Study complete " << std::endl;
 	storage->setLayout("layout.txt");
+	int errCount = 0;
 	for (int i = 0; i < 2000; ++i)
 	{
+		int hwndInt = getProcessId();
 		BmpAdaptor adaptor;
 		SaveWindow2BMPRaw(HWND(hwndInt), adaptor);
 
-		/*std::stringstream str;
-		str << "tmp1/ii";
-		str << i;
-		str << ".bmp";*/
-
-		// SaveWindow2BMP(HWND(hwndInt), str.str());
 		if(adaptor.isValid())
 		{
-			std::string str = storage->getStringFromBmp(adaptor.getBmp());
+			errCount = 0;
+			std::string str = storage->getStringFromBmp(Image::getImageFromBmp(adaptor.getBmp()));
 			std::cout << str << std::endl;
 		}
 		else 
 		{
-			errCount++;
+			++errCount;
 			if(errCount > 4) 
 			{
 				break;
 			}
-			Sleep(100);
+			Sleep(2000);
 		}
 	}
 

@@ -72,6 +72,11 @@ Image Image::clip(const unsigned x, const unsigned y, unsigned width, unsigned h
     return image;
 }
 
+Image Image::getImageFromBmp(const BMP& bmp)
+{
+	return Image(bmp, 0, 0, bmp.getWidth(), bmp.getHeight());
+}
+
 std::ostream& operator<<(std::ostream& stream, const Image& i)
 {
         for (unsigned int h = 0; h < i.getHeigth(); ++h)

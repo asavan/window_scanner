@@ -6,12 +6,14 @@
 class BMP
 {
 public:
-    BMP(const unsigned char*const bmp_file);
+    explicit BMP(const unsigned char*const bmp_file);
 	BMP(const unsigned char*const bmp_raw, unsigned int bit_count, unsigned int width, unsigned int height);
 	RGBColor operator()(const unsigned y, const unsigned x) const;
+	unsigned int getWidth() const {return width_;}
+	unsigned int getHeight() const {return height_;}
 private:
-	// BMP(const BMP&);
-	// BMP& operator=(const BMP&);
+	BMP(const BMP&);
+	BMP& operator=(const BMP&);
     const unsigned char*bitmap_;
     unsigned int bit_count_;
     unsigned int width_;
@@ -27,6 +29,7 @@ class Image
 public:    
     Image(const BMP& bmp, const unsigned int x, const unsigned int y, const unsigned int width, const unsigned int height);
 	Image (const Image& im, const unsigned x, const unsigned y, const unsigned width, const unsigned height);
+	static Image getImageFromBmp(const BMP& bmp);
     unsigned int getHeigth() const { return height_; }
     unsigned int getWidth() const { return width_; }
     RGBColor operator()(const unsigned y, const unsigned x) const;
