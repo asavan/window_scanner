@@ -20,9 +20,9 @@ Positions positions_easy_converter(unsigned int position)
 class Table
 {
 public:
-	// максимальное число игроков за столом
+	// РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ С‡РёСЃР»Рѕ РёРіСЂРѕРєРѕРІ Р·Р° СЃС‚РѕР»РѕРј
 	unsigned int NMax() const {return n_max;} 
-	// число игроков за столом
+	// С‡РёСЃР»Рѕ РёРіСЂРѕРєРѕРІ Р·Р° СЃС‚РѕР»РѕРј
 	unsigned int Number() const {return count;} 
 private:
 	unsigned int count;
