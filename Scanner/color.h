@@ -1,7 +1,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-#include <iostream>
+#include <ostream>
 
 static const int MaxColor = 256;
 static const int CorFuncN = 2;

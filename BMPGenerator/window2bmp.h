@@ -1,6 +1,6 @@
 #ifndef WINDOW_2_BMP_H
 #define WINDOW_2_BMP_H
-#include "BmpAdaptor.h"
+// #include "BmpAdaptor.h"
 #include <string>
 #include <chrono>
 

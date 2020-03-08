@@ -2,6 +2,7 @@
 #include "Scanner/storage.h"
 
 #include "BMPGenerator/window2bmp.h"
+#include "BMPGenerator/BmpAdaptor.h"
 #include <iostream>
 
 #include "Scanner/image.h"
