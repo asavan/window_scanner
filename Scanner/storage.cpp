@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 // #include <limits>
 
 namespace Deck
@@ -55,11 +55,11 @@ std::ostream& operator<<(std::ostream& stream, const Layout& l)
     return stream;
 }
 
-static char* getBMPChars(const boost::filesystem::path& base_dir, const std::string& filename)
+static char* getBMPChars(const std::filesystem::path& base_dir, const std::string& filename)
 {
 	std::string full_name = base_dir.string() + '/' + filename;
     std::fstream file(full_name.c_str(), std::ios::in|std::ios::binary);
-	boost::uintmax_t filesize = boost::filesystem::file_size(full_name);
+    uintmax_t filesize = std::filesystem::file_size(full_name);
     char* bmp_image = new char [filesize];
     file.read(bmp_image, filesize);
     file.close();
@@ -77,8 +77,8 @@ Storage::Storage(const std::string& layout_filename, const std::string& base_dir
 	{
 		known_suits[i] = false;
 	}
-	boost::filesystem::path base_dir(base_dir1);
-    for (boost::filesystem::directory_iterator iter(base_dir), end; iter != end; ++iter )
+	std::filesystem::path base_dir(base_dir1);
+    for (std::filesystem::directory_iterator iter(base_dir), end; iter != end; ++iter )
     {
 		std::string filename = iter->path().filename().string();
         if (is_directory(*iter) || filename.size() < 10 || filename.size()%2 || filename.compare(filename.size() - 4, 4, ".bmp"))
@@ -252,9 +252,9 @@ void Storage::test__(const std::string& layout_file, const std::string& director
 		setLayout(layout_file);
 	}
 
-	boost::filesystem::path directory(directory1);
+	std::filesystem::path directory(directory1);
 
-    for (boost::filesystem::directory_iterator iter(directory), end; iter != end; ++iter )
+    for (std::filesystem::directory_iterator iter(directory), end; iter != end; ++iter )
     {
 		// std::string filename = iter->path().filename();
 		std::string filename = iter->path().filename().string();

@@ -5,6 +5,20 @@
 #include "../Scanner/image.h"
 
 #include <windows.h>
+#include <sstream>
+
+namespace {
+	std::string getFilename(const std::string& prefix, const std::string& basename, int i)
+	{
+		std::stringstream str;
+		str << prefix;
+		str << i;
+		str << basename;
+		str << ".bmp";
+		return str.str();
+	}
+}
+
 
 
 
@@ -288,8 +302,8 @@ void scan_all_windows()
 	int i = 0;	
 	for ( HWND find = FindWindow(NULL, NULL); find; ++i)
 	{
-		std::string winname = "tmp3/" + getWinName(find);
-		SaveWindow2BMP(find, getFilename(winname, i));
+		std::string winname = getWinName(find);
+		SaveWindow2BMP(find, getFilename("tmp3/", winname, i));
 		find = FindWindowEx(NULL, find, NULL, NULL);		
 	}
 }
@@ -301,7 +315,7 @@ int make_many_pictures()
 		Sleeper sl(1);		
 		int hwndInt = getProcessId();
 		std::string baseName = loadBaseName();
-		SaveWindow2BMP(HWND(hwndInt), getFilename(baseName, i));
+		SaveWindow2BMP(HWND(hwndInt), getFilename(baseName, "", i));
 	}
 	return 0;
 }

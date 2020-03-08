@@ -6,20 +6,20 @@
 
 #include "Scanner/image.h"
 
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
 
 
-static boost::shared_ptr<Storage> makeStorage(int argc, char* argv[])
+static std::shared_ptr<Storage> makeStorage(int argc, char* argv[])
 {
-	boost::shared_ptr<Storage> storage;
+	std::shared_ptr<Storage> storage;
     if (argc < 3)
     {
         std::cout << "Default arguments" << std::endl;
-		storage = boost::shared_ptr<Storage>(new Storage("../base/1680x1050/layout", "../base/1680x1050", true));
+		storage = std::make_shared<Storage>("../base/1680x1050/layout", "../base/1680x1050", true);
     }
     else
 	{
-        storage = boost::shared_ptr<Storage>(new Storage(argv[1], argv[2]));
+        storage = std::make_shared<Storage>(argv[1], argv[2]);
 	}
 	
 	if (storage->hasUnlearnedCards())
@@ -51,24 +51,28 @@ bool recognizeOneImage(const Storage& storage, int& errCount, int hwndInt, int c
 
 int main(int argc, char* argv[])
 {
-	boost::shared_ptr<Storage> storage = makeStorage(argc, argv);
-	storage->setLayout("layout.txt");
-	int errCount = 0;
-	int hwndInt = getProcessId();
-	{
-	Sleeper s(0); // only show time
-	for (int i = 0; i < 1000; ++i)
-	{				
-		if(!recognizeOneImage(*storage, errCount, hwndInt, i))
-		{			
-			++errCount;
-			if(errCount > 4) 
+	try {
+		std::shared_ptr<Storage> storage = makeStorage(argc, argv);
+		storage->setLayout("layout.txt");
+		int errCount = 0;
+		int hwndInt = getProcessId();
+		{
+			Sleeper s(0); // only show time
+			for (int i = 0; i < 1000; ++i)
 			{
-				break;
+				if (!recognizeOneImage(*storage, errCount, hwndInt, i))
+				{
+					++errCount;
+					if (errCount > 4)
+					{
+						break;
+					}
+					Sleeper s(5);
+				}
 			}
-			Sleeper s(5);
 		}
-	}
+	} catch (const std::exception & ex) {
+		std::cerr << ex.what() << std::endl;
 	}
     return 0;
 }

@@ -1,27 +1,15 @@
 #include "window2bmp.h"
-
-// #include <windows.h>
-
-#include <sstream>
 #include <fstream>
 #include <iostream>
-#include <ctime>
-#include <boost/thread/thread.hpp>
+#include <thread>
 
-std::string getFilename(const std::string& basename, int i)
-{
-	std::stringstream str;
-	str << basename;
-	str << i;
-	str << ".bmp";
-	return str.str();
-}
+using namespace std::chrono;
 
 std::string loadBaseName()
 {
 	FILE* f;
 	f = fopen("config.txt", "r");
-	if (!f) 
+	if (!f)
 	{
 		throw std::runtime_error("No such file");
 	};
@@ -52,24 +40,23 @@ int getProcessId()
 
 Sleeper::Sleeper(int sec) : sec_(sec)
 {
-	start = boost::chrono::high_resolution_clock::now();
+	start = high_resolution_clock::now();
 }
 
 Sleeper::~Sleeper()
 {
-	boost::chrono::high_resolution_clock::time_point end = boost::chrono::high_resolution_clock::now();
-	typedef boost::chrono::milliseconds ms;
-	ms d = boost::chrono::duration_cast<ms>(end - start);
-	ms ms_wait = ms(sec_*1000) - d;
-	std::cout <<"Time "<< d << std::endl;
-	std::cout <<"TimeToWait "<< ms_wait << std::endl;
-	
-	if (ms_wait > ms::zero())
-	{		
-		boost::this_thread::sleep_for( ms_wait );
-	}
-	else 
+	high_resolution_clock::time_point end = high_resolution_clock::now();
+	auto d = duration_cast<milliseconds>(end - start);
+	auto ms_wait = milliseconds(sec_ * 1000) - d;
+	std::cout << "Time " << d.count() << std::endl;
+	std::cout << "TimeToWait " << ms_wait.count() << std::endl;
+
+	if (ms_wait > milliseconds::zero())
 	{
-		std::cout << "Diff is so big " << d << " " << sec_<< std::endl;
+		std::this_thread::sleep_for(ms_wait);
+	}
+	else
+	{
+		std::cout << "Diff is so big " << d.count() << " " << sec_ << std::endl;
 	}
 }
