@@ -46,7 +46,7 @@ const bool Pattern<TColor, PatternWidth, PatternHeight>::cor_opt_[CorFuncN][CorO
 //     {true,       false,      true}   // MultiplyingCorellation
 };
 
-#include "pattern.tpl"
+#include "pattern.tcc"
 
 #endif
 
