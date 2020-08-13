@@ -7,27 +7,29 @@ class Image;
 class BmpAdaptor
 {
 public:
-	BmpAdaptor();
-	~BmpAdaptor();
+    BmpAdaptor();
+    ~BmpAdaptor();
 
-	bool captureWindow(int hwndId);
-	Image getImage() const;	
+    Image getImage() const;
 
-	void setBitCountWidthHeightBuf(unsigned int bit_count, unsigned int width, unsigned int height, unsigned char* Buf_);
+    bool captureWindow(int hwndId);
+    void setBitCountWidthHeightBuf(unsigned int bit_count, unsigned int width, unsigned int height, unsigned char* Buf_);
+
 private:
-	BmpAdaptor(const BmpAdaptor&);
-	BmpAdaptor& operator=(const BmpAdaptor&);
+    BmpAdaptor(const BmpAdaptor&) = delete;
+    BmpAdaptor& operator=(const BmpAdaptor&) = delete;
 
-	const BMP& getBmp() const;	
-	void setBuf(unsigned char* Buf);
-	bool isValid() const { return isValid_;}
-	
-	bool isValid_;
+
+    const BMP& getBmp() const;
+    void setBuf(unsigned char* Buf);
+    bool isValid() const { return isValid_; }
+
+    bool isValid_;
     unsigned int bit_count_;
     unsigned int width_;
     unsigned int height_;
-	unsigned char* Buf_;
-	const BMP* bmp;
+    unsigned char* Buf_;
+    const BMP* bmp;
 };
 
 #endif

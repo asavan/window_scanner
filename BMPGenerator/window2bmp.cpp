@@ -113,7 +113,7 @@ namespace {
     }
 
 
-    static bool StoreBitmapToAdaptor(BmpAdaptor& adaptor, HBITMAP HBM)
+    bool StoreBitmapToAdaptor(BmpAdaptor& adaptor, HBITMAP HBM)
     {
         BITMAP BM = { 0 };
         GetObject(HBM, sizeof(BITMAP), (LPSTR)&BM);
