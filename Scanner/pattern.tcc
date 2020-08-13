@@ -1,6 +1,3 @@
-#include <algorithm>
-#include <fstream>
-#include <sstream>
 
 template <typename TColor, int PatternWidth, int PatternHeight> Pattern<TColor, PatternWidth, PatternHeight>::Pattern(const Image& image): grade_(1)
 {
@@ -189,10 +186,10 @@ void Pattern<TColor, PatternWidth, PatternHeight>::dump__(const std::string& pat
             *b++ = inverted_colors_matrix[h][w].getInverted().getRed();
         }
 
-    std::ostringstream filename;
-    filename << path << "/" << prefix << num << ".bmp";
 
-    std::ofstream file(filename.str().c_str(), std::ios::binary);
+    string filename = path + "/" + prefix + std::to_string(num) + ".bmp";
+
+    std::ofstream file(filename, std::ios::binary);
     if (file) {
 		file.write((const char*const)headers, 0x36);
 		file.write((const char*const)bitmap, 0x30036);

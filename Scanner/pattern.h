@@ -1,7 +1,6 @@
 #ifndef PATTERN_H
 #define PATTERN_H
 
-// #include "image.h"
 #include "color.h"
 class Image;
 
@@ -10,7 +9,7 @@ class Pattern
 {
 public:
 
-    Pattern(void): grade_(0), summary_intensity_(0), average_intensity_(0) {}
+    Pattern(): grade_(0), summary_intensity_(0), average_intensity_(0) {}
     explicit Pattern(const Image& image);
 
     void merge(const Pattern<TColor>&);
@@ -49,42 +48,3 @@ const bool Pattern<TColor, PatternWidth, PatternHeight>::cor_opt_[CorFuncN][CorO
 #include "pattern.tcc"
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-class MetaPattern
-{
-public:
-    virtual void merge(const MetaPattern&) = 0;
-    virtual ~MetaPattern() { }
-};
-
-class RankPattern: public MetaPattern
-{
-public:
-    RankPattern(const Image& image): pattern_(image.clip(0, 0, 25, 25)) { }
-    virtual void merge(const MetaPattern& a) { pattern_.merge(a); }
-private:
-    Pattern<MonoColor> pattern_;
-};
-
-class SuitPattern: public MetaPattern
-{
-public:
-    SuitPattern(const Image& image): pattern_(image.clip(0, 27, 25, 25)) { }
-    virtual void merge(const MetaPattern& a) { pattern_.merge(a); }
-private:
-    Pattern<RGBColor> pattern_;
-};
-*/

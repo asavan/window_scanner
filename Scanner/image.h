@@ -20,9 +20,6 @@ private:
     unsigned int height_;
 };
 
-class Image;
-
-std::ostream& operator<<(std::ostream& stream, const Image& i);
 
 class Image
 {
@@ -41,5 +38,7 @@ private:
 	const unsigned int x_; 
 	const unsigned int y_;
 };
+
+std::ostream& operator<<(std::ostream& stream, const Image& i);
 
 #endif

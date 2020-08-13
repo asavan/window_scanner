@@ -34,7 +34,6 @@ static std::shared_ptr<Storage> makeStorage(int argc, char* argv[])
 
 bool recognizeOneImage(const Storage& storage, int& errCount, int hwndInt, int count)
 {
-	// int hwndInt = getProcessId();
 	BmpAdaptor adaptor;
 	if(adaptor.captureWindow(hwndInt))
 	{
