@@ -5,19 +5,17 @@
 #include "../Scanner/image.h"
 
 #include <windows.h>
-#include <sstream>
+// #include <shtypes.h>
+// #include <Shellscalingapi.h>
 #include <iostream>
 
 namespace {
 
+    constexpr int scale = 2;
+
     std::string getFilename(const std::string& prefix, const std::string& basename, int i)
     {
-        std::stringstream str;
-        str << prefix;
-        str << i;
-        str << basename;
-        str << ".bmp";
-        return str.str();
+        return prefix + std::to_string(i) + basename + ".bmp";
     }
 
 
@@ -36,7 +34,7 @@ namespace {
     }
 
 
-    BOOL StoreBitmapFile(LPCTSTR lpszFileName, HBITMAP HBM)
+    bool StoreBitmapFile(LPCTSTR lpszFileName, HBITMAP HBM)
     {
         BITMAP BM = { 0 };
         BITMAPFILEHEADER BFH = { 0 };
@@ -97,11 +95,16 @@ namespace {
         DC = GetDC(0);
         GetDIBits(DC, HBM, 0, (WORD)BM.bmHeight, Buf, BIP, DIB_RGB_COLORS);
         ReleaseDC(0, DC);
-        if (check(Buf, DataSize))
+        bool result = check(Buf, DataSize);
+        if (result)
         {
             FP = CreateFile(lpszFileName, GENERIC_READ | GENERIC_WRITE, 0, NULL,
                 CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-            WriteFile(FP, &BFH, sizeof(BITMAPFILEHEADER), &dwTemp, NULL);
+            BOOL r = WriteFile(FP, &BFH, sizeof(BITMAPFILEHEADER), &dwTemp, NULL);
+            if (!r) {
+                result = false;
+                std::cout << lpszFileName << " failed" << std::endl;
+            }
             WriteFile(FP, BIP, sizeof(BITMAPINFOHEADER) + BIP->bmiHeader.biClrUsed *
                 sizeof(RGBQUAD), &dwTemp, NULL);
             WriteFile(FP, Buf, DataSize, &dwTemp, NULL);
@@ -109,7 +112,7 @@ namespace {
         }
         GlobalFree((HGLOBAL)Buf);
         HeapFree(GetProcessHeap(), 0, (LPVOID)BIP);
-        return(true);
+        return result;
     }
 
 
@@ -159,18 +162,6 @@ namespace {
         DeleteObject(oldBM);
         return bm;
     }
-    /*
-    HBITMAP CreateWindwowBitmap(HWND wnd)
-    {
-    RECT r;
-    POINT pt;
-    GetWindowRect(wnd,&r);
-    pt.x=r.right;
-    pt.y=r.bottom;
-    ScreenToClient(wnd,&pt);
-    return(CreateBitmap(GetWindowDC(wnd),pt.x,pt.y));
-    }
-    */
 
     HBITMAP CreateClientWindwowBitmap(HWND wnd)
     {
@@ -180,8 +171,16 @@ namespace {
         {
             return NULL;
         }
+        // DEVICE_SCALE_FACTOR dcf;
+        // HMONITOR monitor = MonitorFromWindow(wnd, MONITOR_DEFAULTTONEAREST);
+        // https://stackoverflow.com/questions/33507031/detect-if-non-dpi-aware-application-has-been-scaled-virtualized
+        //HRESULT scRes = GetScaleFactorForMonitor(
+        //    monitor,
+        //    &dcf
+        //);
+        // std::cout <<"Scale "<< dcf << std::endl;
         HDC DC = GetDC(wnd);
-        HBITMAP hbm = CreateBitmap(DC, r.right, r.bottom);
+        HBITMAP hbm = CreateBitmap(DC, r.right * scale, r.bottom * scale);
         ReleaseDC(wnd, DC);
         return hbm;
     }
@@ -204,26 +203,28 @@ namespace {
 
     std::string getWinName(HWND find)
     {
-        char wname[256];
-        GetWindowText(find, wname, 256);
+        char wname[512];
+        GetWindowText(find, wname, 512);
         std::string winname = wname;
         return winname;
     }
 
-    void SaveWindow2BMP(HWND find, const std::string& filename)
+    bool SaveWindow2BMP(HWND find, const std::string& filename)
     {
-        if (find == 0) return;
+        if (find == 0) {
+            return false;
+        }
         std::string winname = getWinName(find);
         if (winname.empty())
         {
-            std::cout << "No title " << find << std::endl;
-            return;
+            // std::cout << "No title " << find << std::endl;
+            return false;
         }
         HBITMAP bmp = CreateClientWindwowBitmap(find);
         if (bmp == 0)
         {
-            std::cout << "No window " << find << std::endl;
-            return;
+            // std::cout << "No window " << find << std::endl;
+            return false;
         }
         else
         {
@@ -231,8 +232,9 @@ namespace {
             DeleteObject(bmp);
             if (!res)
             {
-                std::cout << "window minimized " << winname << std::endl;
+                // std::cout << "window minimized " << winname << std::endl;
             }
+            return res;
         }
 
     }
@@ -300,12 +302,17 @@ void scan_all_windows()
 {
     Sleeper s(0);
     int i = 0;
+    int count = 0;
     for (HWND find = FindWindow(NULL, NULL); find; ++i)
     {
         std::string winname = getWinName(find);
-        SaveWindow2BMP(find, getFilename("tmp3/", winname, i));
+        bool res = SaveWindow2BMP(find, getFilename("tmp3/", winname, count));
+        if (res) {
+            ++count;
+        }
         find = FindWindowEx(NULL, find, NULL, NULL);
     }
+    std::cout << "All " << i << " good " << count << std::endl;
 }
 
 int make_many_pictures()
