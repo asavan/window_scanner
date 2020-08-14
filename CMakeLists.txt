@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(AutoTranslator)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_DISABLE_PRECOMPILE_HEADERS ON)
 
 add_subdirectory(Scanner)
 add_subdirectory(Logic)
