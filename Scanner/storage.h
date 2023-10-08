@@ -2,7 +2,7 @@
 #define STORAGE_H
 
 #include "pattern.h"
-#include "../deck.h"
+#include "../Logic/deck.h"
 
 #include <vector>
 #include <string>

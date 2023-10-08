@@ -9,7 +9,7 @@ class Pattern
 {
 public:
 
-    Pattern(): grade_(0), summary_intensity_(0), average_intensity_(0) {}
+    Pattern(): grade_(0), summary_intensity_(0), average_intensity_(0), intensity_center_y_(0), intensity_center_x_(0) {}
     explicit Pattern(const Image& image);
 
     void merge(const Pattern<TColor>&);

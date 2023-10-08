@@ -1,4 +1,4 @@
-#include "../../deck.h"
+#include "../deck.h"
 #include <vector>
 
 enum Actions {AC_FOLD, AC_CALL, AC_RAISE, AC_ALLIN};

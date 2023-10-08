@@ -77,10 +77,10 @@ void Pattern<TColor, PatternWidth, PatternHeight>::merge(const Pattern<TColor>& 
     TColor new_value;
 
 //    std::cout << "merge " << sizeof(inverted_colors_matrix) << " " << sizeof(TColor) << std::endl;
-    inverted_colors_matrix[1][51] = TColor();
+/*    inverted_colors_matrix[1][51] = TColor();
     inverted_colors_matrix[1][49] = TColor();
     inverted_colors_matrix[1][50] = TColor();
-    inverted_colors_matrix[1][51] = TColor();
+    inverted_colors_matrix[1][51] = TColor(); */
     for (unsigned int h = 0; h < PatternHeight; ++h)
         for (unsigned int w = 0; w < PatternWidth; ++w)
         {

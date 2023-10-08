@@ -1,4 +1,3 @@
-// #include "deck.h"
 #include "Scanner/storage.h"
 
 #include "BMPGenerator/window2bmp.h"

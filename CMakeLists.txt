@@ -20,7 +20,6 @@ add_subdirectory(BMPGenerator)
 add_subdirectory(Utils)
 
 set(SOURCES main.cpp)
-set(HEADERS deck.h)
 
 
 add_executable(${ProjectId} ${SOURCES})
