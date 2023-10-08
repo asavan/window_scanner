@@ -1,23 +1,30 @@
 
 #include "window2bmp.h"
-#include "BmpAdaptor.h"
+#include "config.h"
 
-#include "../Scanner/image.h"
+#include "../Utils/sleeper.h"
 
 #include <windows.h>
-// #include <shtypes.h>
-// #include <Shellscalingapi.h>
+
+#include <string>
 #include <iostream>
 
+using namespace std::chrono_literals;
+
+
 namespace {
-
-    constexpr int scale = 2;
-
-    std::string getFilename(const std::string& prefix, const std::string& basename, int i)
+    std::string getWinName(HWND find)
     {
-        return prefix + std::to_string(i) + basename + ".bmp";
+        char wname[512];
+        GetWindowText(find, wname, 512);
+        std::string winname = wname;
+        return winname;
     }
 
+    std::string getFilename(const std::string& prefix, const std::string&, int i)
+    {
+        return prefix + std::to_string(i) + ".bmp";
+    }
 
     bool check(LPBYTE Buf, DWORD DataSize)
     {
@@ -33,6 +40,17 @@ namespace {
         return false;
     }
 
+    HBITMAP CreateBitmap(HDC DC, int w, int h)
+    {
+        HBITMAP bm, oldBM;
+        HDC memDC = CreateCompatibleDC(DC);
+        bm = CreateCompatibleBitmap(DC, w, h);
+        oldBM = (HBITMAP)SelectObject(memDC, bm);
+        BitBlt(memDC, 0, 0, w, h, DC, 0, 0, SRCCOPY);
+        DeleteDC(memDC);
+        DeleteObject(oldBM);
+        return bm;
+    }
 
     bool StoreBitmapFile(LPCTSTR lpszFileName, HBITMAP HBM)
     {
@@ -41,7 +59,7 @@ namespace {
         LPBITMAPINFO BIP = { 0 };
         HDC DC;
         LPBYTE Buf;
-        DWORD ColorSize, DataSize;
+        DWORD ColorSize = 0, DataSize = 0;
         WORD BitCount;
         HANDLE FP;
         DWORD dwTemp;
@@ -52,7 +70,7 @@ namespace {
         case 4:
         case 8:
         case 32:
-            ColorSize = sizeof(RGBQUAD) * (1 << BitCount);
+            ColorSize = sizeof(RGBQUAD) * (1llu << BitCount);
             break;
         case 16:
         case 24:
@@ -74,6 +92,9 @@ namespace {
         DataSize = ((BM.bmWidth * BitCount + 31) & ~31) / 8 * BM.bmHeight;
         BIP = (LPBITMAPINFO)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
             sizeof(BITMAPINFOHEADER) + ColorSize);
+        if (!BIP) {
+            return false;
+        }
         BIP->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         BIP->bmiHeader.biWidth = BM.bmWidth;
         BIP->bmiHeader.biHeight = BM.bmHeight;
@@ -115,54 +136,6 @@ namespace {
         return result;
     }
 
-
-    bool StoreBitmapToAdaptor(BmpAdaptor& adaptor, HBITMAP HBM)
-    {
-        BITMAP BM = { 0 };
-        GetObject(HBM, sizeof(BITMAP), (LPSTR)&BM);
-        WORD BitCount = BM.bmPlanes * BM.bmBitsPixel;
-        DWORD DataSize = ((BM.bmWidth * BitCount + 31) & ~31) / 8 * BM.bmHeight;
-        if (BitCount != 32)
-        {
-            std::cout << BitCount << std::endl;
-            std::cout << DataSize << std::endl;
-            return false;
-        }
-        BITMAPINFO BIP = { 0 };
-        BIP.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        BIP.bmiHeader.biWidth = BM.bmWidth;
-        BIP.bmiHeader.biHeight = BM.bmHeight;
-        BIP.bmiHeader.biPlanes = 1;
-        BIP.bmiHeader.biBitCount = BitCount;
-        BIP.bmiHeader.biCompression = 0;
-        BIP.bmiHeader.biSizeImage = DataSize;
-        BIP.bmiHeader.biXPelsPerMeter = 0;
-        BIP.bmiHeader.biYPelsPerMeter = 0;
-        // if (BitCount < 16) BIP.bmiHeader.biClrUsed = (1<<BitCount);
-        BIP.bmiHeader.biClrImportant = 0;
-        // Buf = (LPBYTE)GlobalAlloc(GMEM_FIXED, DataSize);
-        HDC DC = GetDC(0);
-        unsigned char* Buf = new unsigned char[DataSize];
-        int res = GetDIBits(DC, HBM, 0, (WORD)BM.bmHeight, Buf, &BIP, DIB_RGB_COLORS);
-        // std::cout << "Res "<<res << std::endl;
-        ReleaseDC(0, DC);
-        adaptor.setBitCountWidthHeightBuf(BitCount, BM.bmWidth, BM.bmHeight, Buf);
-        return true;
-    }
-
-
-    HBITMAP CreateBitmap(HDC DC, int w, int h)
-    {
-        HBITMAP bm, oldBM;
-        HDC memDC = CreateCompatibleDC(DC);
-        bm = CreateCompatibleBitmap(DC, w, h);
-        oldBM = (HBITMAP)SelectObject(memDC, bm);
-        BitBlt(memDC, 0, 0, w, h, DC, 0, 0, SRCCOPY);
-        DeleteDC(memDC);
-        DeleteObject(oldBM);
-        return bm;
-    }
-
     HBITMAP CreateClientWindwowBitmap(HWND wnd)
     {
         RECT r;
@@ -178,36 +151,12 @@ namespace {
         //    monitor,
         //    &dcf
         //);
-        // std::cout <<"Scale "<< dcf << std::endl;
         HDC DC = GetDC(wnd);
-        HBITMAP hbm = CreateBitmap(DC, r.right * scale, r.bottom * scale);
+        HBITMAP hbm = CreateBitmap(DC, r.right * 2, r.bottom * 2);
         ReleaseDC(wnd, DC);
         return hbm;
     }
 
-    static void SaveWindow2BMPRaw(int find, BmpAdaptor& adaptor)
-    {
-        if (find == 0) return;
-        HBITMAP bmp = CreateClientWindwowBitmap((HWND)find);
-        if (bmp == 0)
-        {
-            std::cout << "No window " << find << std::endl;
-        }
-        else
-        {
-            StoreBitmapToAdaptor(adaptor, bmp);
-            DeleteObject(bmp);
-        }
-    }
-
-
-    std::string getWinName(HWND find)
-    {
-        char wname[512];
-        GetWindowText(find, wname, 512);
-        std::string winname = wname;
-        return winname;
-    }
 
     bool SaveWindow2BMP(HWND find, const std::string& filename)
     {
@@ -236,71 +185,12 @@ namespace {
             }
             return res;
         }
-
-    }
-
-}
-
-BmpAdaptor::BmpAdaptor() : isValid_(false), bit_count_(0), width_(0), height_(0), Buf_(0), bmp(0)
-{
-};
-
-BmpAdaptor::~BmpAdaptor()
-{
-    if (isValid_)
-    {
-        // GlobalFree((HGLOBAL)Buf_);
-        delete[] Buf_;
-        delete bmp;
-    }
-    else
-    {
-        printf("Not delete this %p\n", Buf_);
     }
 }
-
-
-Image BmpAdaptor::getImage() const
-{
-    return Image::getImageFromBmp(getBmp());
-}
-
-void BmpAdaptor::setBitCountWidthHeightBuf(unsigned int bit_count, unsigned int width, unsigned int height, unsigned char* Buf)
-{
-    bit_count_ = bit_count;
-    width_ = width;
-    height_ = height;
-    setBuf(Buf);
-}
-
-void BmpAdaptor::setBuf(unsigned char* Buf)
-{
-    Buf_ = Buf;
-    isValid_ = true;
-    bmp = new BMP(reinterpret_cast<const unsigned char*>(Buf_), bit_count_, width_, height_);
-}
-
-const BMP& BmpAdaptor::getBmp() const
-{
-    if (!isValid_)
-    {
-        throw std::runtime_error("Invalid adapter");
-    }
-
-    return *bmp;
-}
-
-bool BmpAdaptor::captureWindow(int hwndId)
-{
-    SaveWindow2BMPRaw(hwndId, *this);
-    return isValid();
-}
-
-
 
 void scan_all_windows()
 {
-    Sleeper s(0);
+    Sleeper s(0s);
     int i = 0;
     int count = 0;
     for (HWND find = FindWindow(NULL, NULL); find; ++i)
@@ -317,13 +207,12 @@ void scan_all_windows()
 
 int make_many_pictures()
 {
+    ConfigParser config("config.txt");
+    
     for (int i = 0; i < 1000; ++i)
     {
-        Sleeper sl(1);
-        int hwndInt = getProcessId();
-        std::string baseName = loadBaseName();
-        SaveWindow2BMP(HWND(hwndInt), getFilename(baseName, "", i));
+        Sleeper sl(1s);
+        SaveWindow2BMP(reinterpret_cast<HWND>(config.processId()), getFilename(config.baseName(), "", i));
     }
     return 0;
 }
-

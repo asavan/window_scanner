@@ -35,7 +35,7 @@ Actions BasicChart::act(const PreflopState& state, const Situation& situation)
 {
 	/// first circle
 	// very strong
-	if( ((state.cards[0].rank >= Deck::King) && (state.cards[0].rank >= Deck::King)) ||
+	if( ((state.cards[0].rank >= Deck::King) && (state.cards[1].rank >= Deck::King)) ||
 		((state.cards[0].rank == Deck::Queen) && (state.cards[1].rank == Deck::Queen))
 		)
 	{
@@ -48,7 +48,7 @@ Actions BasicChart::act(const PreflopState& state, const Situation& situation)
 	{
 		return AC_FOLD;
 	}
-	if (pos > 4)
+	if (pos > 4 || pos < 0)
 	{
 		NO_IMPLEMENTATION
 	}
@@ -66,7 +66,7 @@ Actions BasicChart::act(const PreflopState& state, const Situation& situation)
 		return AC_FOLD;
 	}
 	// second circle
-	NO_IMPLEMENTATION;
+	// NO_IMPLEMENTATION;
 }
 
 int BasicChart::calculate_state(const PreflopState& state)
@@ -151,7 +151,7 @@ int BasicChart::calculate_state(const PreflopState& state)
 int BasicChart::calculate_actions(const Situation& situation)
 {
 	int num_of_limpers = 0;
-	int num_of_folds = 0;
+	// int num_of_folds = 0;
 	int num_of_rasers = 0;
 	int num_of_callers = 0;
 	unsigned int last_bet = situation.bets[1];

@@ -10,10 +10,13 @@ static int quad_corellation(const RGBColor& a, const RGBColor& b)
 {
     return -((a.getRed() - b.getRed())*(a.getRed() - b.getRed()) + (a.getGreen() - b.getGreen())*(a.getGreen() - b.getGreen()) + (a.getBlue() - b.getBlue())*(a.getBlue() - b.getBlue()));
 }
+
+/*
 static int mult_corellation(const RGBColor& a, const RGBColor& b)
 {
     return a.getRed()*b.getRed() + a.getGreen()*b.getGreen() + a.getBlue()*b.getBlue();
 }
+*/
 
 int (*const RGBColor::color_corellation[CorFuncN])(const RGBColor&, const RGBColor&) = { line_corellation, quad_corellation };
 

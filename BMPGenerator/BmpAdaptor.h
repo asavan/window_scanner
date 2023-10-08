@@ -12,7 +12,7 @@ public:
 
     Image getImage() const;
 
-    bool captureWindow(int hwndId);
+    bool captureWindow(unsigned long long hwndId);
     void setBitCountWidthHeightBuf(unsigned int bit_count, unsigned int width, unsigned int height, unsigned char* Buf_);
 
 private:

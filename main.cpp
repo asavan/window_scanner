@@ -1,13 +1,17 @@
-#include "deck.h"
+// #include "deck.h"
 #include "Scanner/storage.h"
 
 #include "BMPGenerator/window2bmp.h"
+#include "BMPGenerator/config.h"
 #include "BMPGenerator/BmpAdaptor.h"
 #include <iostream>
 
 #include "Scanner/image.h"
+#include "Utils/sleeper.h"
 
 #include <memory>
+
+using namespace std::chrono_literals;
 
 
 static std::shared_ptr<Storage> makeStorage(int argc, char* argv[])
@@ -32,7 +36,7 @@ static std::shared_ptr<Storage> makeStorage(int argc, char* argv[])
     return storage;
 }
 
-bool recognizeOneImage(const Storage& storage, int& errCount, int hwndInt, int count)
+bool recognizeOneImage(const Storage& storage, int& errCount, unsigned long long hwndInt, int count)
 {
     BmpAdaptor adaptor;
     if (adaptor.captureWindow(hwndInt))
@@ -55,9 +59,10 @@ int main(int argc, char* argv[])
         std::shared_ptr<Storage> storage = makeStorage(argc, argv);
         storage->setLayout("layout.txt");
         int errCount = 0;
-        int hwndInt = getProcessId();
+        ConfigParser config("config.txt");
+        unsigned long long hwndInt = config.processId();
         {
-            Sleeper s(0); // only show time
+            Sleeper s(0s); // only show time
             for (int i = 0; i < 1000; ++i)
             {
                 if (!recognizeOneImage(*storage, errCount, hwndInt, i))
@@ -67,7 +72,7 @@ int main(int argc, char* argv[])
                     {
                         break;
                     }
-                    Sleeper s(5);
+                    Sleeper s1(5s);
                 }
             }
         }

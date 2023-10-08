@@ -3,12 +3,6 @@
 
 enum Actions {AC_FOLD, AC_CALL, AC_RAISE, AC_ALLIN};
 
-class Action
-{
-	explicit Action(Actions type) {}
-	virtual ~Action() {}
-};
-
 
 struct Situation
 {
@@ -23,7 +17,7 @@ struct PreflopState
 };
 
 
-enum Positions {PS_EARLY, PS_MIDLE, PS_LATE, PS_SMALL_B, PS_BIG_B, PS_UNKNOWN};
+enum Positions {PS_EARLY = 0, PS_MIDLE, PS_LATE, PS_SMALL_B, PS_BIG_B, PS_UNKNOWN};
 
 enum Power {PW_STRONG, PW_MEDICORE, PW_SPECULATIVE, PW_MIXED, PW_TRASH};
 

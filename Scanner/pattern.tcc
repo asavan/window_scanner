@@ -1,4 +1,8 @@
 
+#include "image.h"
+#include <iostream>
+#include <string>
+
 template <typename TColor, int PatternWidth, int PatternHeight> Pattern<TColor, PatternWidth, PatternHeight>::Pattern(const Image& image): grade_(1)
 {
     int cx, cy, mpix, mpiy, cpx1, cpy1, cpx2, cpy2;
@@ -187,7 +191,7 @@ void Pattern<TColor, PatternWidth, PatternHeight>::dump__(const std::string& pat
         }
 
 
-    string filename = path + "/" + prefix + std::to_string(num) + ".bmp";
+    std::string filename = path + "/" + prefix + std::to_string(num) + ".bmp";
 
     std::ofstream file(filename, std::ios::binary);
     if (file) {
@@ -195,7 +199,7 @@ void Pattern<TColor, PatternWidth, PatternHeight>::dump__(const std::string& pat
 		file.write((const char*const)bitmap, 0x30036);
 		file.close();
     } else {
-		std::cout << "No such file " << filename.str() << std::endl;
+		std::cout << "No such file " << filename << std::endl;
     }
     num++;
 }
